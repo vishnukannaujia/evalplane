@@ -1,0 +1,20 @@
+[
+  {"trace_id": "t-1", "span_id": "a", "parent_id": null, "name": "agent", "start_time": 100, "end_time": 900,
+   "attributes": {"openinference.span.kind": "AGENT", "input.value": "What is the refund policy?",
+                  "output.value": "Refunds up to $100 are automatic."}},
+  {"trace_id": "t-1", "span_id": "b", "parent_id": "a", "name": "retrieve", "start_time": 200, "end_time": 250,
+   "attributes": {"openinference.span.kind": "RETRIEVER", "input.value": "refund policy",
+                  "retrieval.documents.0.document.id": "refund-policy",
+                  "retrieval.documents.1.document.id": 42}},
+  {"trace_id": "t-1", "span_id": "c", "parent_id": "a", "name": "llm", "start_time": 300, "end_time": 400,
+   "attributes": {"openinference.span.kind": "LLM", "llm.model_name": "claude-x",
+                  "llm.token_count.prompt": 30, "llm.token_count.completion": 7, "llm.cost.total": 0.5}},
+  {"trace_id": "t-1", "span_id": "d", "parent_id": "a", "name": "search_policy", "start_time": 500, "end_time": 600,
+   "status": "ERROR",
+   "attributes": {"openinference.span.kind": "TOOL", "tool.name": "search_policy",
+                  "tool.parameters": "{\"query\": \"refund\"}", "output.value": "[1, 2]"}},
+  {"trace_id": "t-1", "span_id": "e", "parent_id": "a", "name": "escalation-agent", "start_time": 700, "end_time": 800,
+   "attributes": {"openinference.span.kind": "AGENT"}},
+  {"trace_id": "t-2", "span_id": "z", "parent_id": null, "name": "other", "start_time": 1, "end_time": 2,
+   "attributes": {"openinference.span.kind": "TOOL", "tool.name": "ping", "input.value": "hello"}}
+]

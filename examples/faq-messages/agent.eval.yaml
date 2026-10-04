@@ -1,0 +1,18 @@
+# A read-only FAQ agent: tier T1, so the plan is short and the thresholds are lighter.
+version: 1
+agent:
+  name: faq-messages
+  description: Answers shipping, returns and warranty questions from the help center.
+  entrypoint: faq_agent:run
+tools:
+  - name: search_docs
+    side_effect: read
+    args_schema: {type: object, required: [query], properties: {query: {type: string, minLength: 3}}}
+features:
+  retrieval: true
+policies:
+  - id: NO-ACTIONS
+    rule: The FAQ agent never takes actions; it only answers questions.
+    check: {type: max_calls, tool: search_docs, n: 3}
+success_criteria:
+  - {id: SC1, kind: task, description: Answers help-center questions correctly, metric: pass_rate, target: 0.9}

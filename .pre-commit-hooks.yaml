@@ -1,0 +1,7 @@
+- id: evalplane-validate
+  name: evalplane validate
+  description: Check that agent.eval.yaml and the eval cases under evals/ are valid.
+  entry: evalplane validate
+  language: python
+  pass_filenames: false
+  files: '^(agent\.eval\.yaml|evals/)'

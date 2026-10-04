@@ -1,0 +1,241 @@
+name: Evalplane
+description: >-
+  Run your agent's eval cases, gate the PR on its risk tier, post a sticky PR comment with failing cases and
+  new coverage gaps, and upload JUnit XML and an HTML report.
+author: vishnukannaujia
+branding:
+  icon: check-circle
+  color: green
+
+inputs:
+  working-directory:
+    description: Directory containing agent.eval.yaml.
+    default: "."
+  stage:
+    description: Gate stage (design | ci | pre-release).
+    default: ci
+  python-version:
+    description: Python version to set up.
+    default: "3.12"
+  install:
+    description: >-
+      Command that installs evalplane and your agent's dependencies, run at the repository root.
+      If it creates ./.venv (e.g. `uv sync`), that venv is put on PATH.
+    default: pip install evalplane
+  run-args:
+    description: Extra arguments for `evalplane run`, e.g. `--traces traces/` to replay recorded runs.
+    default: ""
+  baseline:
+    description: On pull requests, compute coverage on the base branch (git worktree) and report new gaps.
+    default: "true"
+  comment:
+    description: On pull requests, create or update one sticky PR comment (the job needs pull-requests write permission).
+    default: "true"
+  fail-on-new-gaps:
+    description: Fail the job if the PR introduces a new must-priority coverage gap.
+    default: "false"
+  github-token:
+    description: Token used to post the PR comment.
+    default: ${{ github.token }}
+
+outputs:
+  verdict:
+    description: PASS, WARN or FAIL.
+    value: ${{ steps.report.outputs.verdict }}
+  gate-exit-code:
+    description: Exit code of `evalplane gate` (0 = PASS/WARN, 1 = FAIL, 2 = invalid config).
+    value: ${{ steps.gate.outputs.code }}
+  junit:
+    description: Path to the JUnit XML report.
+    value: ${{ steps.report.outputs.junit }}
+  html:
+    description: Path to the HTML report.
+    value: ${{ steps.report.outputs.html }}
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - uses: astral-sh/setup-uv@v6
+
+    - name: Install
+      shell: bash
+      # at the repo root, not working-directory: an install command like `pip install -e .`
+      # or `uv sync` refers to the project, not to the folder holding agent.eval.yaml
+      working-directory: ${{ github.workspace }}
+      env:
+        EP_INSTALL: ${{ inputs.install }}
+      run: |
+        set -euo pipefail
+        bash -c "$EP_INSTALL"
+        if [ -x .venv/bin/evalplane ]; then echo "$PWD/.venv/bin" >> "$GITHUB_PATH"; fi
+        mkdir -p "$RUNNER_TEMP/evalplane"
+
+    - name: Run eval cases
+      id: run
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        EP_RUN_ARGS: ${{ inputs.run-args }}
+      run: |
+        set +e
+        # word-splitting of EP_RUN_ARGS is intended
+        evalplane run -q $EP_RUN_ARGS
+        code=$?
+        echo "code=$code" >> "$GITHUB_OUTPUT"
+        # failing cases are reported by the gate; only a broken config (2) is worth a warning here
+        if [ "$code" = "2" ]; then echo "::error::evalplane run: invalid agent.eval.yaml or cases"; fi
+        exit 0
+
+    - name: Gate
+      id: gate
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        EP_STAGE: ${{ inputs.stage }}
+      run: |
+        set +e
+        evalplane gate --stage "$EP_STAGE" --format md -o "$RUNNER_TEMP/evalplane/scorecard.md"
+        code=$?
+        echo "code=$code" >> "$GITHUB_OUTPUT"
+        if [ -s "$RUNNER_TEMP/evalplane/scorecard.md" ]; then
+          cat "$RUNNER_TEMP/evalplane/scorecard.md" >> "$GITHUB_STEP_SUMMARY"
+        fi
+        exit 0
+
+    - name: Coverage on the base branch
+      id: baseline
+      if: inputs.baseline == 'true' && (github.event_name == 'pull_request' || github.event_name == 'pull_request_target')
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        BASE_REF: ${{ github.base_ref }}
+      run: |
+        set +e
+        out="$RUNNER_TEMP/evalplane"
+        top="$(git rev-parse --show-toplevel)" || { echo "::warning::not a git checkout; skipping baseline"; exit 0; }
+        rel="$(git rev-parse --show-prefix)"
+        base="$RUNNER_TEMP/evalplane-base"
+        if ! git fetch --no-tags --depth=1 origin "$BASE_REF"; then
+          echo "::warning::could not fetch base branch '$BASE_REF'; skipping new-gap report"; exit 0
+        fi
+        rm -rf "$base"
+        git worktree add --detach "$base" FETCH_HEAD >/dev/null || { echo "::warning::git worktree failed"; exit 0; }
+        if [ -f "$base/$rel/agent.eval.yaml" ] \
+           && (cd "$base/$rel" && evalplane coverage --format json -o "$out/base-coverage.json"); then
+          echo "found=true" >> "$GITHUB_OUTPUT"
+        else
+          # first PR that adds evalplane, or the base config does not parse with this version
+          echo "::notice::no coverage on base branch '$BASE_REF'; new-gap report skipped"
+          rm -f "$out/base-coverage.json"
+          echo "found=false" >> "$GITHUB_OUTPUT"
+        fi
+        git worktree remove --force "$base" >/dev/null 2>&1
+        exit 0
+
+    - name: Reports (JUnit, HTML, PR comment)
+      id: report
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        EP_STAGE: ${{ inputs.stage }}
+        EP_OUT: ${{ runner.temp }}/evalplane
+      run: |
+        set +e
+        mkdir -p .evalplane/reports
+        evalplane report --stage "$EP_STAGE" --format junit -o .evalplane/reports/junit.xml \
+          || echo "::warning::could not write the JUnit report"
+        evalplane report --stage "$EP_STAGE" --format html -o .evalplane/reports/report.html \
+          || echo "::warning::could not write the HTML report"
+        echo "junit=$PWD/.evalplane/reports/junit.xml" >> "$GITHUB_OUTPUT"
+        echo "html=$PWD/.evalplane/reports/report.html" >> "$GITHUB_OUTPUT"
+        python - <<'PY'
+        # The PR comment needs the base-branch coverage too, so build it from the library.
+        # <!-- evalplane --> (reporters.PR_MARKER) marks the sticky comment.
+        import json, os
+        from pathlib import Path
+        from evalplane import build_plan, derive_tier, load_cases, load_profile
+        from evalplane.coverage import CoverageReport, analyse, diff
+        from evalplane.gate import evaluate_gate
+        from evalplane.models import Stage
+        from evalplane.reporters import pr_comment_md
+        from evalplane.runner import load_results
+
+        out = Path(os.environ["EP_OUT"])
+        profile = load_profile("agent.eval.yaml")
+        plan = build_plan(profile, derive_tier(profile))
+        cases = load_cases(profile.evals.cases, base_dir=profile.base_dir)
+        rdir = profile.base_dir / profile.evals.results_dir
+        results = load_results(rdir / "latest.json") if (rdir / "latest.json").exists() else None
+        cal = rdir / "calibration.json"
+        calibration = json.loads(cal.read_text()) if cal.exists() else None
+        cov = analyse(plan, profile, cases)
+        stage = Stage(os.environ["EP_STAGE"].replace("-", "_"))
+        gate = evaluate_gate(plan, cov, stage, results, calibration=calibration)
+        d = None
+        base = out / "base-coverage.json"
+        if base.exists():
+            d = diff(CoverageReport.model_validate_json(base.read_text()), cov)
+            new_must = [g for g in d.new_gaps if g.priority == "must"]
+            (out / "new-must-gaps").write_text(str(len(new_must)))
+        (out / "comment.md").write_text(pr_comment_md(plan, cov, results, gate, diff=d))
+        with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+            f.write(f"verdict={gate.verdict}\n")
+        PY
+        exit 0
+
+    - name: Sticky PR comment
+      if: >-
+        inputs.comment == 'true' && github.event.pull_request.number &&
+        (github.event_name == 'pull_request' || github.event_name == 'pull_request_target')
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        REPO: ${{ github.repository }}
+        PR: ${{ github.event.pull_request.number }}
+        BODY: ${{ runner.temp }}/evalplane/comment.md
+      run: |
+        set +e
+        if [ ! -s "$BODY" ]; then echo "::warning::no PR comment was generated"; exit 0; fi
+        id="$(gh api --paginate "repos/$REPO/issues/$PR/comments" \
+              --jq '.[] | select(.body | startswith("<!-- evalplane -->")) | .id' | head -n1)"
+        if [ -n "$id" ]; then
+          gh api -X PATCH "repos/$REPO/issues/comments/$id" -F "body=@$BODY" >/dev/null
+        else
+          gh api -X POST "repos/$REPO/issues/$PR/comments" -F "body=@$BODY" >/dev/null
+        fi
+        # forks get a read-only token: never fail the job over the comment
+        if [ $? -ne 0 ]; then
+          echo "::warning::could not post the PR comment (needs permissions: pull-requests: write)"
+        fi
+        exit 0
+
+    - name: Upload results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: evalplane-results
+        path: |
+          ${{ inputs.working-directory }}/.evalplane/results/
+          ${{ inputs.working-directory }}/.evalplane/reports/
+          ${{ inputs.working-directory }}/.evalplane/latest.json
+        if-no-files-found: warn
+        # .evalplane/runs/ (full traces with tool arguments) is deliberately not uploaded
+
+    - name: Verdict
+      shell: bash
+      env:
+        GATE: ${{ steps.gate.outputs.code }}
+        VERDICT: ${{ steps.report.outputs.verdict }}
+        FAIL_ON_NEW_GAPS: ${{ inputs.fail-on-new-gaps }}
+        NEW_GAPS_FILE: ${{ runner.temp }}/evalplane/new-must-gaps
+      run: |
+        echo "evalplane gate: ${VERDICT:-unknown} (exit ${GATE:-?})"
+        if [ "$FAIL_ON_NEW_GAPS" = "true" ] && [ -f "$NEW_GAPS_FILE" ] && [ "$(cat "$NEW_GAPS_FILE")" != "0" ]; then
+          echo "::error::this PR introduces $(cat "$NEW_GAPS_FILE") new must-priority coverage gap(s)"
+          exit 1
+        fi
+        exit "${GATE:-1}"

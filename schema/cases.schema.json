@@ -1,0 +1,488 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Evalplane cases",
+  "type": "object",
+  "properties": {
+    "suite": {
+      "type": "string"
+    },
+    "defaults": {
+      "type": "object"
+    },
+    "cases": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Case"
+      }
+    }
+  },
+  "$defs": {
+    "Budgets": {
+      "additionalProperties": false,
+      "properties": {
+        "max_steps": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Steps"
+        },
+        "max_tool_calls": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Tool Calls"
+        },
+        "max_cost_usd": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Cost Usd"
+        },
+        "max_latency_ms": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Latency Ms"
+        }
+      },
+      "title": "Budgets",
+      "type": "object"
+    },
+    "Expectations": {
+      "additionalProperties": false,
+      "properties": {
+        "tools": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ToolExpect"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "forbidden_tools": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Forbidden Tools",
+          "type": "array"
+        },
+        "output": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OutputExpect"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "final_state": {
+          "items": {
+            "$ref": "#/$defs/StateExpect"
+          },
+          "title": "Final State",
+          "type": "array"
+        },
+        "retrieved": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Retrieved",
+          "type": "array"
+        },
+        "budgets": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Budgets"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "judge": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/JudgeExpect"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "status": {
+          "default": "ok",
+          "enum": [
+            "ok",
+            "error",
+            "any"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "title": "Expectations",
+      "type": "object"
+    },
+    "JudgeExpect": {
+      "additionalProperties": false,
+      "properties": {
+        "rubric": {
+          "title": "Rubric",
+          "type": "string"
+        },
+        "threshold": {
+          "default": 0.7,
+          "title": "Threshold",
+          "type": "number"
+        }
+      },
+      "required": [
+        "rubric"
+      ],
+      "title": "JudgeExpect",
+      "type": "object"
+    },
+    "OutputExpect": {
+      "additionalProperties": false,
+      "properties": {
+        "contains": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Contains"
+        },
+        "not_contains": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Not Contains"
+        },
+        "regex": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Regex"
+        },
+        "equals": {
+          "default": null,
+          "title": "Equals"
+        },
+        "json_schema": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Json Schema"
+        },
+        "case_sensitive": {
+          "default": false,
+          "title": "Case Sensitive",
+          "type": "boolean"
+        }
+      },
+      "title": "OutputExpect",
+      "type": "object"
+    },
+    "Stage": {
+      "enum": [
+        "design",
+        "dev",
+        "ci",
+        "pre_release",
+        "production"
+      ],
+      "title": "Stage",
+      "type": "string"
+    },
+    "StateExpect": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "equals": {
+          "default": null,
+          "title": "Equals"
+        },
+        "match": {
+          "default": null,
+          "title": "Match"
+        },
+        "exists": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exists"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "title": "StateExpect",
+      "type": "object"
+    },
+    "ToolCallSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "args": {
+          "additionalProperties": true,
+          "title": "Args",
+          "type": "object"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "ToolCallSpec",
+      "type": "object"
+    },
+    "ToolExpect": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "default": "in_order",
+          "enum": [
+            "exact",
+            "in_order",
+            "any_order",
+            "subset"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "calls": {
+          "items": {
+            "$ref": "#/$defs/ToolCallSpec"
+          },
+          "title": "Calls",
+          "type": "array"
+        }
+      },
+      "title": "ToolExpect",
+      "type": "object"
+    },
+    "Case": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "suite": {
+          "default": "default",
+          "title": "Suite",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "input": {
+          "default": null,
+          "title": "Input"
+        },
+        "context": {
+          "additionalProperties": true,
+          "title": "Context",
+          "type": "object"
+        },
+        "covers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Covers",
+          "type": "array"
+        },
+        "policies": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Policies",
+          "type": "array"
+        },
+        "owasp": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Owasp",
+          "type": "array"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "stage": {
+          "$ref": "#/$defs/Stage",
+          "default": "ci"
+        },
+        "repeat": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Repeat",
+          "type": "integer"
+        },
+        "trace": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Trace"
+        },
+        "from_run": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "From Run"
+        },
+        "turns": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Turns",
+          "type": "array"
+        },
+        "simulator": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Simulator"
+        },
+        "max_turns": {
+          "default": 6,
+          "minimum": 1,
+          "title": "Max Turns",
+          "type": "integer"
+        },
+        "external_status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "External Status"
+        },
+        "external_reason": {
+          "default": "",
+          "title": "External Reason",
+          "type": "string"
+        },
+        "expect": {
+          "$ref": "#/$defs/Expectations"
+        },
+        "source": {
+          "default": "",
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "Case",
+      "type": "object"
+    }
+  }
+}

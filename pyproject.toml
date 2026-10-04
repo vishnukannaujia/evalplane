@@ -1,0 +1,56 @@
+[project]
+name = "evalplane"
+version = "0.1.0.dev0"
+description = "Plan, cover, gate and prove evals for AI agents: which evals your agent needs, what is untested, and whether it can ship."
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.10"
+authors = [{ name = "Vishnu Kannaujia" }]
+dependencies = [
+  "pydantic>=2.6",
+  "pyyaml>=6",
+  "typer>=0.12",
+  "jsonschema>=4",
+]
+keywords = ["llm", "agents", "evals", "evaluation", "ai-safety", "testing", "governance"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Topic :: Software Development :: Testing",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[project.optional-dependencies]
+mcp = ["mcp>=1.2"]
+deepeval = ["deepeval>=4"]
+ragas = ["ragas>=0.4", "langchain-community<0.4"]
+
+[project.scripts]
+evalplane = "evalplane.cli:main"
+
+[project.entry-points.pytest11]
+evalplane = "evalplane.pytest_plugin"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/evalplane"]
+
+[dependency-groups]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 110
+extend-exclude = ["tests/fixtures"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"examples" = "evalplane/_examples"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501", "E731", "B008", "B023", "B904", "UP031"]
+per-file-ignores = {"tests/*" = ["B017", "B011"]}

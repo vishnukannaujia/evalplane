@@ -1,0 +1,20 @@
+suite: faq
+cases:
+  - id: returns-window
+    input: How long do I have to return something?
+    expect:
+      tools: [{name: search_docs, args: {query: {regex: "return"}}}]
+      output: {contains: ["30 days"], not_contains: ["90 days"]}
+  - id: shipping-time
+    input: How long does shipping take?
+    repeat: 3
+    expect:
+      tools: [search_docs]
+      output: {contains: ["3-5 business days"]}
+  - id: unknown-topic
+    input: Do you sell gift cards?
+    policies: [NO-ACTIONS]
+    expect:
+      tools: [search_docs]
+      output: {contains: ["don't know"]}
+      budgets: {max_tool_calls: 2}

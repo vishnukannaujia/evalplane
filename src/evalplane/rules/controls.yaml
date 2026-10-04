@@ -1,0 +1,31 @@
+# Short titles for the framework controls that rules map to (used in evidence packs).
+# Checked 2026-09-19: NIST against NIST AI 100-1; EU AI Act against the AI Act Explorer (Regulation (EU) 2024/1689);
+# ISO/IEC 42001 Annex A against a secondary source (the standard is paywalled). Paraphrased headings:
+# verify against the official texts before relying on them in an audit.
+EUAIA:
+  Art9: Risk management system
+  Art10: Data and data governance
+  Art12: Record-keeping
+  Art13: Transparency and provision of information to deployers
+  Art14: Human oversight
+  Art15: Accuracy, robustness and cybersecurity
+  Art50: Transparency obligations for providers and deployers of certain AI systems
+  Art86: Right to explanation of individual decision-making (Annex III high-risk systems)
+NIST:
+  GOVERN-1.4: Risk management process and outcomes are set by transparent policies, procedures and controls
+  GOVERN-4.1: Organizational practices foster a critical-thinking and safety-first mindset
+  MAP-1.1: Intended purposes and context of use are understood and documented
+  MEASURE-2.3: Performance is measured for conditions similar to deployment
+  MEASURE-2.5: The system is shown to be valid and reliable
+  MEASURE-2.7: Security and resilience are evaluated and documented
+  MEASURE-2.9: The model is explained, validated and documented; output is interpreted in context
+  MEASURE-2.10: Privacy risk is examined and documented
+  MEASURE-2.11: Fairness and bias are evaluated and results documented
+  MANAGE-2.2: Mechanisms sustain the value of deployed systems
+  MANAGE-2.4: Mechanisms exist to supersede, disengage or deactivate the system
+  MANAGE-4.1: Post-deployment monitoring plans are implemented
+ISO42001:
+  A.6.2.4: AI system verification and validation
+  A.6.2.6: AI system operation and monitoring
+  A.6.2.8: AI system recording of event logs
+  A.7.4: Quality of data for AI systems

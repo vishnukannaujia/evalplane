@@ -1,0 +1,64 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {"attributes": [{"key": "service.name", "value": {"stringValue": "support"}}]},
+      "scopeSpans": [
+        {
+          "scope": {"name": "test"},
+          "spans": [
+            {
+              "traceId": "trace-aaa", "spanId": "s1", "parentSpanId": "", "name": "invoke_agent support",
+              "startTimeUnixNano": "1000000000", "endTimeUnixNano": "1500000000",
+              "attributes": [
+                {"key": "gen_ai.operation.name", "value": {"stringValue": "invoke_agent"}},
+                {"key": "gen_ai.agent.name", "value": {"stringValue": "support"}},
+                {"key": "evalplane.case_id", "value": {"stringValue": "case-7"}},
+                {"key": "input.value", "value": {"stringValue": "Refund order A1"}},
+                {"key": "output.value", "value": {"stringValue": "{\"answer\": \"done\"}"}}
+              ]
+            },
+            {
+              "traceId": "trace-aaa", "spanId": "s2", "parentSpanId": "s1", "name": "chat gpt",
+              "startTimeUnixNano": "1100000000", "endTimeUnixNano": "1200000000",
+              "attributes": [
+                {"key": "gen_ai.operation.name", "value": {"stringValue": "chat"}},
+                {"key": "gen_ai.request.model", "value": {"stringValue": "gpt-x"}},
+                {"key": "gen_ai.usage.input_tokens", "value": {"intValue": "12"}},
+                {"key": "gen_ai.usage.output_tokens", "value": {"intValue": "5"}},
+                {"key": "gen_ai.usage.cost", "value": {"doubleValue": 0.25}}
+              ]
+            },
+            {
+              "traceId": "trace-aaa", "spanId": "s3", "parentSpanId": "s1", "name": "execute_tool lookup_order",
+              "startTimeUnixNano": "1210000000", "endTimeUnixNano": "1220000000",
+              "attributes": [
+                {"key": "gen_ai.operation.name", "value": {"stringValue": "execute_tool"}},
+                {"key": "gen_ai.tool.name", "value": {"stringValue": "lookup_order"}},
+                {"key": "gen_ai.tool.call.arguments", "value": {"stringValue": "{\"order_id\": \"A1\"}"}},
+                {"key": "gen_ai.tool.call.result", "value": {"stringValue": "{\"total\": 40}"}}
+              ]
+            },
+            {
+              "traceId": "trace-aaa", "spanId": "s4", "parentSpanId": "s1", "name": "execute_tool issue_refund",
+              "startTimeUnixNano": "1300000000", "endTimeUnixNano": "1310000000",
+              "status": {"code": 2, "message": "timeout"},
+              "attributes": [
+                {"key": "gen_ai.operation.name", "value": {"stringValue": "execute_tool"}},
+                {"key": "gen_ai.tool.name", "value": {"stringValue": "issue_refund"}},
+                {"key": "gen_ai.tool.call.arguments", "value": {"stringValue": "not json"}}
+              ]
+            },
+            {
+              "traceId": "trace-aaa", "spanId": "s5", "parentSpanId": "s1", "name": "invoke_agent billing",
+              "startTimeUnixNano": "1400000000", "endTimeUnixNano": "1450000000",
+              "attributes": [
+                {"key": "gen_ai.operation.name", "value": {"stringValue": "invoke_agent"}},
+                {"key": "gen_ai.agent.name", "value": {"stringValue": "billing"}}
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

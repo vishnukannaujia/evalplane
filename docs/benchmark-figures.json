@@ -1,0 +1,69 @@
+{
+  "_README": [
+    "Every figure published in docs/benchmark-tau2.md, in one place, so it can be rechecked by a command",
+    "instead of by eye. `python scripts/verify-benchmark.py --tau2 <path-to-tau2-bench>` recomputes each one",
+    "and exits non-zero on any disagreement.",
+    "",
+    "Why this file exists: four published figures in that document turned out wrong when someone checked them",
+    "properly (38 -> 12 on the first airline run; the affirmation vocabulary; a confirmation ratio with the",
+    "wrong denominator; 103/3 -> 94/11 from aggregate rather than per-call attribution). Each was caught by a",
+    "human looking, none by anything mechanical. One stale number in that write-up costs more than any feature.",
+    "",
+    "`corpus` pins which trajectory files the numbers come from, because including the ablations changes them",
+    "by an order of magnitude.",
+    "",
+    "`not_machine_checked` lists the published figures this script does NOT verify, and why. Read it before",
+    "trusting the absence of a failure."
+  ],
+  "corpus": {
+    "source": "https://github.com/sierra-research/tau2-bench",
+    "path": "data/tau2/results/final",
+    "airline": ["*airline*.json"],
+    "retail": ["*_retail_default_*.json", "*_retail_base_*.json"],
+    "telecom": ["*_telecom_default_*.json", "*_telecom_base_*.json"],
+    "excluded": "no-user / op / no-user-op ablations, and telecom-workflow: a different tool surface, not different compliance",
+    "held_out_policies": {"retail": ["CANCEL-REASON"], "telecom": ["CONFIRM-REFUEL"]},
+    "global_checks_excluded_from_policy_rates": ["SCOPE", "LOOP", "ARGS"]
+  },
+
+  "results_table": {
+    "airline": {"trajectories": 800, "solved": 431, "breaking": 52, "solved_and_breaking": 11, "lenient_rate_pct": 2.6},
+    "retail": {"trajectories": 1824, "solved": 1324, "breaking": 88, "solved_and_breaking": 53, "lenient_rate_pct": 4.0},
+    "telecom": {"trajectories": 1824, "solved": 773, "breaking": 29, "solved_and_breaking": 5, "lenient_rate_pct": 0.6}
+  },
+
+  "effect_split": {
+    "airline": {"effective": 94, "blocked": 11},
+    "retail": {"effective": 122, "blocked": 15},
+    "telecom": {"effective": 24, "blocked": 13}
+  },
+
+  "like_for_like_three_tools": {
+    "airline": {"tools": ["book_reservation", "cancel_reservation", "update_reservation_flights"],
+                "solved_and_breaking": 10, "of_solved": 431, "rate_pct": 2.3},
+    "retail": {"tools": ["cancel_pending_order", "modify_pending_order_items", "exchange_delivered_order_items"],
+               "solved_and_breaking": 27, "of_solved": 1324, "rate_pct": 2.0}
+  },
+
+  "gradient_per_100_action_calls": {
+    "airline": {"solved": [23, 525], "failed": [82, 698]},
+    "retail": {"solved": [82, 2126], "failed": [55, 898]},
+    "telecom": {"solved": [5, 1163], "failed": [32, 1891]}
+  },
+
+  "scalars": {
+    "telecom_read_bill_violations_with_any_of_prior": 36,
+    "telecom_refuel_calls": 538,
+    "telecom_refuel_over_cap": 1,
+    "telecom_undeclared_tool_attempts": 146,
+    "loops": {"telecom": 92, "airline": 1, "retail": 0}
+  },
+
+  "not_machine_checked": {
+    "strict_rates": "The `each: true` column (airline 8.6%, retail 18.3%) is recomputed, but 0.6% for telecom is trivially equal because its only confirmation rule is held out.",
+    "calibration_curve": "The three-row consent curve needs llmcontract-tau2's own tool sets and vocabulary reimplemented in our harness; it is not reproduced here. Their published 0.8%/0.2% reproduce from their repo, offline.",
+    "confidence_intervals": "The log-Poisson CIs are derived from the counts above; the counts are checked, the arithmetic is not.",
+    "hand_verification": "The 20-case retail review (0 clear false positives, 5 borderline) is a human judgement and cannot be recomputed.",
+    "arxiv_figures": "arXiv 2607.07405's numbers are quoted from the paper, not reproduced; it re-ran the benchmark with API keys on different models."
+  }
+}

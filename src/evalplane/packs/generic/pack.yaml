@@ -1,0 +1,5 @@
+id: generic
+name: Generic agent
+description: Works for any agent. Core rules only; start here if no sector pack fits.
+default_tier: auto
+rules: []

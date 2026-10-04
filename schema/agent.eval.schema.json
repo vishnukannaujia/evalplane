@@ -1,0 +1,724 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "AgentInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "pattern": "^[a-z0-9][a-z0-9_\\-]{1,63}$",
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "owner": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Owner"
+        },
+        "org": {
+          "default": "local",
+          "title": "Org",
+          "type": "string"
+        },
+        "team": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Team"
+        },
+        "labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Labels",
+          "type": "object"
+        },
+        "external_ids": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "External Ids",
+          "type": "object"
+        },
+        "framework": {
+          "default": "custom",
+          "title": "Framework",
+          "type": "string"
+        },
+        "entrypoint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Entrypoint"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model"
+        },
+        "user_facing": {
+          "default": true,
+          "title": "User Facing",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "AgentInfo",
+      "type": "object"
+    },
+    "Attestation": {
+      "additionalProperties": false,
+      "properties": {
+        "requirement": {
+          "title": "Requirement",
+          "type": "string"
+        },
+        "by": {
+          "title": "By",
+          "type": "string"
+        },
+        "date": {
+          "format": "date",
+          "title": "Date",
+          "type": "string"
+        },
+        "evidence": {
+          "default": "",
+          "title": "Evidence",
+          "type": "string"
+        },
+        "note": {
+          "default": "",
+          "title": "Note",
+          "type": "string"
+        }
+      },
+      "required": [
+        "requirement",
+        "by",
+        "date"
+      ],
+      "title": "Attestation",
+      "type": "object"
+    },
+    "EvalPaths": {
+      "additionalProperties": false,
+      "properties": {
+        "cases": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Cases",
+          "type": "array"
+        },
+        "traces": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Traces",
+          "type": "array"
+        },
+        "results_dir": {
+          "default": ".evalplane",
+          "title": "Results Dir",
+          "type": "string"
+        }
+      },
+      "title": "EvalPaths",
+      "type": "object"
+    },
+    "Features": {
+      "additionalProperties": false,
+      "properties": {
+        "retrieval": {
+          "default": false,
+          "title": "Retrieval",
+          "type": "boolean"
+        },
+        "citations": {
+          "default": false,
+          "title": "Citations",
+          "type": "boolean"
+        },
+        "memory": {
+          "default": false,
+          "title": "Memory",
+          "type": "boolean"
+        },
+        "persistent_memory": {
+          "default": false,
+          "title": "Persistent Memory",
+          "type": "boolean"
+        },
+        "multi_agent": {
+          "default": false,
+          "title": "Multi Agent",
+          "type": "boolean"
+        },
+        "code_execution": {
+          "default": false,
+          "title": "Code Execution",
+          "type": "boolean"
+        },
+        "structured_output": {
+          "default": false,
+          "title": "Structured Output",
+          "type": "boolean"
+        }
+      },
+      "title": "Features",
+      "type": "object"
+    },
+    "Policy": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Z][A-Z0-9_\\-]{1,31}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "rule": {
+          "title": "Rule",
+          "type": "string"
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity",
+          "default": "high"
+        },
+        "check": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PolicyCheck"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "id",
+        "rule"
+      ],
+      "title": "Policy",
+      "type": "object"
+    },
+    "PolicyCheck": {
+      "additionalProperties": false,
+      "description": "A deterministic check that makes a natural-language policy testable.\n\ntype is one of: max_arg, allowed_values, forbidden_tool, requires_prior_tool,\nrequires_approval, max_calls, output_forbidden_patterns.",
+      "properties": {
+        "type": {
+          "enum": [
+            "max_arg",
+            "allowed_values",
+            "forbidden_tool",
+            "requires_prior_tool",
+            "requires_approval",
+            "max_calls",
+            "output_forbidden_patterns",
+            "output_must_match",
+            "arg_forbidden_patterns",
+            "arg_must_match",
+            "requires_user_confirmation",
+            "arg_matches_prior_result",
+            "arg_from_user"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Field"
+        },
+        "pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pattern"
+        },
+        "tool": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tool"
+        },
+        "arg": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Arg"
+        },
+        "max": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max"
+        },
+        "values": {
+          "anyOf": [
+            {
+              "items": {},
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Values"
+        },
+        "prior": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prior"
+        },
+        "n": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "N"
+        },
+        "per": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Per"
+        },
+        "patterns": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Patterns"
+        },
+        "each": {
+          "default": false,
+          "title": "Each",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "PolicyCheck",
+      "type": "object"
+    },
+    "RiskInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "tier": {
+          "default": "auto",
+          "enum": [
+            "auto",
+            "T1",
+            "T2",
+            "T3",
+            "T4"
+          ],
+          "title": "Tier",
+          "type": "string"
+        },
+        "override_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Override Reason"
+        },
+        "pack": {
+          "default": "generic",
+          "title": "Pack",
+          "type": "string"
+        },
+        "regulated": {
+          "default": false,
+          "title": "Regulated",
+          "type": "boolean"
+        },
+        "governance": {
+          "default": false,
+          "title": "Governance",
+          "type": "boolean"
+        }
+      },
+      "title": "RiskInfo",
+      "type": "object"
+    },
+    "Sensitivity": {
+      "enum": [
+        "public",
+        "internal",
+        "confidential",
+        "personal",
+        "regulated"
+      ],
+      "title": "Sensitivity",
+      "type": "string"
+    },
+    "Severity": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Severity",
+      "type": "string"
+    },
+    "SideEffect": {
+      "enum": [
+        "read",
+        "notify",
+        "write",
+        "external",
+        "irreversible"
+      ],
+      "title": "SideEffect",
+      "type": "string"
+    },
+    "SuccessCriterion": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "kind": {
+          "default": "task",
+          "enum": [
+            "task",
+            "business"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "metric": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Metric"
+        },
+        "target": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target"
+        }
+      },
+      "required": [
+        "id",
+        "description"
+      ],
+      "title": "SuccessCriterion",
+      "type": "object"
+    },
+    "Tool": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "pattern": "^[A-Za-z_][\\w.\\-]*$",
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "side_effect": {
+          "$ref": "#/$defs/SideEffect",
+          "default": "read"
+        },
+        "reversible": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reversible"
+        },
+        "requires_approval": {
+          "default": false,
+          "title": "Requires Approval",
+          "type": "boolean"
+        },
+        "data_sensitivity": {
+          "$ref": "#/$defs/Sensitivity",
+          "default": "internal"
+        },
+        "untrusted_output": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Untrusted Output"
+        },
+        "args_schema": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Args Schema"
+        },
+        "max_calls_per_run": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Calls Per Run"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Tool",
+      "type": "object"
+    },
+    "Waiver": {
+      "additionalProperties": false,
+      "properties": {
+        "requirement": {
+          "title": "Requirement",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "approved_by": {
+          "title": "Approved By",
+          "type": "string"
+        },
+        "expires": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expires"
+        }
+      },
+      "required": [
+        "requirement",
+        "reason",
+        "approved_by"
+      ],
+      "title": "Waiver",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "The contents of `agent.eval.yaml`.",
+  "properties": {
+    "version": {
+      "const": 1,
+      "default": 1,
+      "title": "Version",
+      "type": "integer"
+    },
+    "agent": {
+      "$ref": "#/$defs/AgentInfo"
+    },
+    "risk": {
+      "$ref": "#/$defs/RiskInfo"
+    },
+    "features": {
+      "$ref": "#/$defs/Features"
+    },
+    "tools": {
+      "items": {
+        "$ref": "#/$defs/Tool"
+      },
+      "title": "Tools",
+      "type": "array"
+    },
+    "policies": {
+      "items": {
+        "$ref": "#/$defs/Policy"
+      },
+      "title": "Policies",
+      "type": "array"
+    },
+    "success_criteria": {
+      "items": {
+        "$ref": "#/$defs/SuccessCriterion"
+      },
+      "title": "Success Criteria",
+      "type": "array"
+    },
+    "thresholds": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "title": "Thresholds",
+      "type": "object"
+    },
+    "evals": {
+      "$ref": "#/$defs/EvalPaths"
+    },
+    "waivers": {
+      "items": {
+        "$ref": "#/$defs/Waiver"
+      },
+      "title": "Waivers",
+      "type": "array"
+    },
+    "attestations": {
+      "items": {
+        "$ref": "#/$defs/Attestation"
+      },
+      "title": "Attestations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "agent"
+  ],
+  "title": "Evalplane agent profile (agent.eval.yaml)",
+  "type": "object"
+}

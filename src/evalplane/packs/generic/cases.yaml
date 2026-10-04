@@ -1,0 +1,6 @@
+suite: starter
+cases:
+  - id: happy-path
+    input: "<a typical request>"
+    expect:
+      output: {contains: ["<something the answer must say>"]}

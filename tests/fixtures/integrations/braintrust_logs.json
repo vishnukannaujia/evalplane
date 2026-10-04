@@ -1,0 +1,340 @@
+{
+ "events": [
+  {
+   "id": "d3df2156-0550-43d7-856e-53b2fcdea14a",
+   "metrics": {
+    "start": 1789842384.672307,
+    "end": 1789842384.673971
+   },
+   "span_attributes": {
+    "type": "task",
+    "name": "support_agent",
+    "exec_counter": 1
+   },
+   "context": {
+    "caller_functionname": "<module>",
+    "caller_filename": "support_bot/agent.py",
+    "caller_lineno": 8,
+    "span_origin": {
+     "name": "braintrust.sdk.python",
+     "version": "0.41.0",
+     "instrumentation": {
+      "name": "braintrust-python-logger"
+     }
+    }
+   },
+   "input": {
+    "input": "Refund order A200, it arrived broken."
+   },
+   "metadata": {
+    "evalplane.case_id": "refund-damaged"
+   },
+   "project_id": "support-bot",
+   "log_id": "g",
+   "output": "I've escalated your refund to a human agent.",
+   "created": "2026-09-19T18:26:24.672309+00:00",
+   "span_id": "5f92e4886e4a6fa3",
+   "root_span_id": "ac75919b3d4c7c57f35eac9edf18a41e",
+   "span_parents": null
+  },
+  {
+   "id": "462249bc-e092-4791-bc9a-a9d4348e3d62",
+   "metrics": {
+    "start": 1789842384.673022,
+    "prompt_tokens": 120,
+    "completion_tokens": 18,
+    "tokens": 138,
+    "end": 1789842384.673263
+   },
+   "span_attributes": {
+    "type": "llm",
+    "name": "Chat Completion",
+    "exec_counter": 2
+   },
+   "context": {
+    "caller_functionname": "<module>",
+    "caller_filename": "support_bot/agent.py",
+    "caller_lineno": 9,
+    "span_origin": {
+     "name": "braintrust.sdk.python",
+     "version": "0.41.0",
+     "instrumentation": {
+      "name": "braintrust-python-logger"
+     }
+    }
+   },
+   "input": [
+    {
+     "role": "user",
+     "content": "Refund order A200"
+    }
+   ],
+   "metadata": {
+    "model": "gpt-4o-mini"
+   },
+   "project_id": "support-bot",
+   "log_id": "g",
+   "output": [
+    {
+     "index": 0,
+     "finish_reason": "tool_calls",
+     "message": {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+       {
+        "id": "call_1",
+        "type": "function",
+        "function": {
+         "name": "lookup_order",
+         "arguments": "{\"order_id\": \"A200\"}"
+        }
+       }
+      ]
+     }
+    }
+   ],
+   "created": "2026-09-19T18:26:24.673024+00:00",
+   "span_id": "31fffd43620269d8",
+   "root_span_id": "ac75919b3d4c7c57f35eac9edf18a41e",
+   "span_parents": [
+    "5f92e4886e4a6fa3"
+   ]
+  },
+  {
+   "id": "03cb9b85-24ed-42b1-8149-889b71ee7e22",
+   "metrics": {
+    "start": 1789842384.673277,
+    "end": 1789842384.6734688
+   },
+   "span_attributes": {
+    "type": "tool",
+    "name": "lookup_order",
+    "exec_counter": 3
+   },
+   "context": {
+    "caller_functionname": "<module>",
+    "caller_filename": "support_bot/agent.py",
+    "caller_lineno": 11,
+    "span_origin": {
+     "name": "braintrust.sdk.python",
+     "version": "0.41.0",
+     "instrumentation": {
+      "name": "braintrust-python-logger"
+     }
+    }
+   },
+   "input": {
+    "order_id": "A200"
+   },
+   "project_id": "support-bot",
+   "log_id": "g",
+   "output": {
+    "order_id": "A200",
+    "amount": 250,
+    "status": "delivered"
+   },
+   "created": "2026-09-19T18:26:24.673278+00:00",
+   "span_id": "5c05bd3691f90e11",
+   "root_span_id": "ac75919b3d4c7c57f35eac9edf18a41e",
+   "span_parents": [
+    "5f92e4886e4a6fa3"
+   ]
+  },
+  {
+   "id": "1d512acf-1a73-41ea-8ff1-0d7de451c561",
+   "metrics": {
+    "start": 1789842384.67348,
+    "end": 1789842384.673641
+   },
+   "span_attributes": {
+    "type": "task",
+    "name": "Handoff",
+    "exec_counter": 4
+   },
+   "context": {
+    "caller_functionname": "<module>",
+    "caller_filename": "support_bot/agent.py",
+    "caller_lineno": 13,
+    "span_origin": {
+     "name": "braintrust.sdk.python",
+     "version": "0.41.0",
+     "instrumentation": {
+      "name": "braintrust-python-logger"
+     }
+    }
+   },
+   "metadata": {
+    "from_agent": "support_agent",
+    "to_agent": "refunds_agent"
+   },
+   "project_id": "support-bot",
+   "log_id": "g",
+   "created": "2026-09-19T18:26:24.673480+00:00",
+   "span_id": "618a00622e3ca794",
+   "root_span_id": "ac75919b3d4c7c57f35eac9edf18a41e",
+   "span_parents": [
+    "5f92e4886e4a6fa3"
+   ]
+  },
+  {
+   "id": "b8ce8ca4-e380-4919-bed0-67b3e6f9c31c",
+   "metrics": {
+    "start": 1789842384.67365,
+    "end": 1789842384.673801
+   },
+   "span_attributes": {
+    "type": "tool",
+    "name": "issue_refund",
+    "exec_counter": 5
+   },
+   "context": {
+    "caller_functionname": "<module>",
+    "caller_filename": "support_bot/agent.py",
+    "caller_lineno": 15,
+    "span_origin": {
+     "name": "braintrust.sdk.python",
+     "version": "0.41.0",
+     "instrumentation": {
+      "name": "braintrust-python-logger"
+     }
+    }
+   },
+   "input": "{\"order_id\": \"A200\", \"amount\": 250}",
+   "project_id": "support-bot",
+   "log_id": "g",
+   "error": "PermissionError: refunds over $100 need approval",
+   "created": "2026-09-19T18:26:24.673650+00:00",
+   "span_id": "112ccc4c284bb1fc",
+   "root_span_id": "ac75919b3d4c7c57f35eac9edf18a41e",
+   "span_parents": [
+    "5f92e4886e4a6fa3"
+   ]
+  },
+  {
+   "id": "b2fe0878-5f35-4d0c-a28c-9dc70da656d3",
+   "metrics": {
+    "start": 1789842384.6738088,
+    "end": 1789842384.6739619
+   },
+   "span_attributes": {
+    "name": "helper",
+    "exec_counter": 6
+   },
+   "context": {
+    "caller_functionname": "<module>",
+    "caller_filename": "support_bot/agent.py",
+    "caller_lineno": 17,
+    "span_origin": {
+     "name": "braintrust.sdk.python",
+     "version": "0.41.0",
+     "instrumentation": {
+      "name": "braintrust-python-logger"
+     }
+    }
+   },
+   "input": {
+    "x": 1
+   },
+   "project_id": "support-bot",
+   "log_id": "g",
+   "output": 2,
+   "created": "2026-09-19T18:26:24.673810+00:00",
+   "span_id": "f257a6f8340d0413",
+   "root_span_id": "ac75919b3d4c7c57f35eac9edf18a41e",
+   "span_parents": [
+    "5f92e4886e4a6fa3"
+   ]
+  },
+  {
+   "id": "2c179757-6f26-4fce-979f-7ea70e40ea6d",
+   "metrics": {
+    "start": 1789842401.123737,
+    "end": 1789842401.125041
+   },
+   "span_attributes": {
+    "type": "task",
+    "name": "faq_agent",
+    "exec_counter": 1
+   },
+   "context": {
+    "caller_functionname": "<module>",
+    "caller_filename": "support_bot/agent.py",
+    "caller_lineno": 8,
+    "span_origin": {
+     "name": "braintrust.sdk.python",
+     "version": "0.41.0",
+     "instrumentation": {
+      "name": "braintrust-python-logger"
+     }
+    }
+   },
+   "input": "Where is my order B7?",
+   "project_id": "support-bot",
+   "log_id": "g",
+   "output": {
+    "output": "Order B7 ships tomorrow."
+   },
+   "created": "2026-09-19T18:26:41.123739+00:00",
+   "span_id": "32e12d28911d1c87",
+   "root_span_id": "948f42af64f5888e2f54fa4812e8cded",
+   "span_parents": null
+  },
+  {
+   "id": "73837229-718e-4856-b2a6-d2cb16ff7bc7",
+   "metrics": {
+    "start": 1789842401.124817,
+    "prompt_tokens": 80,
+    "completion_tokens": 12,
+    "end": 1789842401.1250281
+   },
+   "span_attributes": {
+    "type": "llm",
+    "name": "Chat Completion",
+    "exec_counter": 2
+   },
+   "context": {
+    "caller_functionname": "<module>",
+    "caller_filename": "support_bot/agent.py",
+    "caller_lineno": 9,
+    "span_origin": {
+     "name": "braintrust.sdk.python",
+     "version": "0.41.0",
+     "instrumentation": {
+      "name": "braintrust-python-logger"
+     }
+    }
+   },
+   "metadata": {
+    "model": "gpt-4o-mini"
+   },
+   "project_id": "support-bot",
+   "log_id": "g",
+   "output": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+       {
+        "id": "call_9",
+        "type": "function",
+        "function": {
+         "name": "track_order",
+         "arguments": "{\"order_id\": \"B7\"}"
+        }
+       }
+      ]
+     }
+    }
+   ],
+   "created": "2026-09-19T18:26:41.124818+00:00",
+   "span_id": "0c44e20f39cd6a43",
+   "root_span_id": "948f42af64f5888e2f54fa4812e8cded",
+   "span_parents": [
+    "32e12d28911d1c87"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,63 @@
+# The airline customer-service agent from τ²-bench (sierra-research/tau2-bench), described for Evalplane.
+# Tools and policy are taken from the public benchmark (src/tau2/domains/airline/tools.py and policy.md).
+# There is no agent code here: this example shows what Evalplane says about a well-known benchmark agent
+# *before any test is written*. Run `evalplane plan` and `evalplane coverage`.
+version: 1
+agent:
+  name: tau2-airline
+  description: Books, changes and cancels flight reservations and handles baggage and compensation for airline customers.
+  framework: other
+risk:
+  pack: support-agent
+tools:
+  - {name: get_user_details, side_effect: read, data_sensitivity: personal}
+  - {name: get_reservation_details, side_effect: read, data_sensitivity: personal}
+  - {name: search_direct_flight, side_effect: read}
+  - {name: search_onestop_flight, side_effect: read}
+  - {name: list_all_airports, side_effect: read}
+  - {name: get_flight_status, side_effect: read}
+  - {name: calculate, side_effect: read}
+  # these charge or refund a payment method on file, so they cannot simply be undone
+  - {name: book_reservation, side_effect: irreversible, data_sensitivity: personal}
+  - {name: cancel_reservation, side_effect: irreversible}
+  - {name: update_reservation_flights, side_effect: irreversible}
+  - {name: update_reservation_baggages, side_effect: irreversible}
+  - {name: update_reservation_passengers, side_effect: write, data_sensitivity: personal}
+  - {name: send_certificate, side_effect: irreversible}   # issues travel credit: money
+  - {name: transfer_to_human_agents, side_effect: write}
+policies:
+  # Explicit user confirmation before any change: the user's last turn before the call must be a clear yes.
+  - id: CONFIRM-BOOKING
+    rule: Get explicit user confirmation before booking.
+    severity: critical
+    check: {type: requires_user_confirmation, tool: book_reservation}
+  - id: CONFIRM-CANCEL
+    rule: Get explicit user confirmation before cancelling.
+    severity: critical
+    check: {type: requires_user_confirmation, tool: cancel_reservation}
+  - id: CONFIRM-CHANGE
+    rule: Get explicit user confirmation before changing flights.
+    severity: critical
+    check: {type: requires_user_confirmation, tool: update_reservation_flights}
+  - id: LOOK-UP-FIRST
+    rule: Look up the reservation before cancelling it (to check it is cancellable).
+    check: {type: requires_prior_tool, tool: cancel_reservation, prior: get_reservation_details}
+  - id: KNOW-THE-USER
+    rule: Get the user's details before booking.
+    check: {type: requires_prior_tool, tool: book_reservation, prior: get_user_details}
+  - id: MAX-5-PASSENGERS
+    rule: At most five passengers per reservation.
+    check: {type: max_arg, tool: book_reservation, arg: passengers, max: 5}
+  - id: CERTIFICATE-CAP
+    rule: Compensation is $100 per passenger for a cancelled flight ($50 for a delay), so never more than $500.
+    severity: critical
+    check: {type: max_arg, tool: send_certificate, arg: amount, max: 500}
+  - id: NO-PROACTIVE-COMPENSATION
+    rule: Do not offer compensation unless the user asks for it.
+    severity: medium
+    # no deterministic check: this needs a judge or a case per scenario, so Evalplane will flag it as untestable
+  - id: BASIC-ECONOMY-NO-CHANGES
+    rule: Basic economy flights cannot be modified.
+    # depends on reservation state, not on a single tool call: test it with a case (forbidden_tools: [update_reservation_flights])
+success_criteria:
+  - {id: SC1, kind: task, description: "Reservation database ends in the expected state (the τ²-bench reward)", metric: pass_rate, target: 0.9}

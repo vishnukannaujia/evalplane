@@ -1,0 +1,13 @@
+version: 1
+agent:
+  name: my-agent
+  description: Describe in one sentence what your agent does.
+  entrypoint: agent:run          # module:function that takes (input, context) and returns the answer
+risk:
+  pack: generic
+tools:
+  - name: search
+    side_effect: read
+policies: []
+success_criteria:
+  - {id: SC1, kind: task, description: Answers the user's question correctly, metric: pass_rate, target: 0.9}
