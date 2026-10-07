@@ -1,0 +1,36 @@
+cff-version: 1.2.0
+message: "If you refer to this study or tool, please cite it as below, and cite the prior work it builds on."
+title: "Evalplane: one policy sentence, three defensible readings, 35x apart"
+abstract: >-
+  A deterministic policy-coverage checker for LLM agents, and a calibration study over 4,448 published
+  tau2-bench trajectories showing that the measured rate of policy violation depends on which defensible
+  reading of a policy sentence the auditor encodes, by a factor of 35.
+type: software
+authors:
+  - family-names: Kannaujia
+    given-names: Vishnu
+repository-code: "https://github.com/vishnukannaujia/evalplane"
+license: Apache-2.0
+version: 0.1.0.dev0
+date-released: "2026-10-04"
+keywords:
+  - agent-evaluation
+  - llm-evaluation
+  - policy-as-code
+  - tau2-bench
+references:
+  - type: software
+    title: "llmcontract-tau2: session-type contracts over tau2-bench trajectories"
+    notes: "Published the underlying finding five months earlier; one point on the calibration curve."
+    repository-code: "https://github.com/chrisbartoloburlo/llmcontract-tau2"
+    authors:
+      - family-names: Bartolo Burlo
+        given-names: Christian
+  - type: article
+    title: "Policy Loopholes in Agent Evaluation: When Policy Ambiguity Masquerades as Agent Error"
+    notes: "Established the ambiguity thesis this study quantifies."
+    url: "https://arxiv.org/abs/2609.14400"
+    year: 2026
+    authors:
+      - family-names: Cao
+        given-names: Hongliu

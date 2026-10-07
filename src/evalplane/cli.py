@@ -181,7 +181,7 @@ def init(
     scan_dir: Path | None = typer.Option(None, "--scan",
                                          help="Find tools in this code directory (default: --dir when interactive)."),
     example: str | None = typer.Option(None, "--example",
-                                       help="Copy a runnable example (support-refund, faq-messages, tau2-airline)."),
+                                       help="Copy a runnable example (support-refund, faq-messages, langgraph-ops, tau2-airline)."),
 ):
     """Create agent.eval.yaml from your code's tools and a few questions (plus starter eval cases)."""
     from .init_wizard import copy_example, run_init

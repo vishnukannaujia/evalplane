@@ -23,7 +23,7 @@ jobs:
           # run-args: --traces traces/          # replay recorded traces: no API keys in CI
 ```
 
-A copy-ready version is in [`.github/workflows/example-pr.yml`](../.github/workflows/example-pr.yml).
+A copy-ready version is in `.github/workflows/example-pr.yml` (not published in this repo — see the note above).
 
 | Input | Default | What it does |
 |---|---|---|

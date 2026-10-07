@@ -1,4 +1,6 @@
-# Evalplane on τ²-bench: what a task score misses
+# One policy sentence, three defensible readings, 35× apart
+
+*A calibration study on τ²-bench.*
 
 [τ²-bench](https://github.com/sierra-research/tau2-bench) scores a customer-service agent on whether the
 episode ended in the right state: the database matches, the expected actions happened, a judge checks a few
@@ -12,6 +14,20 @@ checks were wrong.
 Read this document for the method, not for a number. Its main result is that **the headline number depends on
 how you read one policy sentence, by 35×** — which is why the profile matters more than the percentage, and
 why another project published 0.6% off the same files where we publish 2.6%. Both are right.
+
+## Three results, in order of importance
+
+1. **A compliance rate is a property of the auditor's semantics, not of the benchmark.** The same rule over
+   the same trajectories gives 0.8%, 4.2% or 27.8% in retail depending only on how long a confirmation is
+   taken to last — **35× in retail, 70× in airline**. Two independent implementations disagreeing is what
+   made this measurable.
+2. **The failure mode replicates across domains and models.** Holding the check surface constant at three
+   irreversible tools, airline runs 2.3% and retail 2.0%: the agent asks a follow-up, the customer answers
+   *that*, and the agent treats the answer as consent.
+3. **Violations concentrate in runs the benchmark failed** (1.6–3.9× per action call) — but still occur at
+   ~4 per 100 action calls in runs it passed, and those are the ones nothing catches.
+
+Everything else here is method, caveats, or a record of what we got wrong.
 
 ## Prior art, and what is actually new here
 
