@@ -164,7 +164,21 @@ only how long a confirmation lasts:
 | one yes lasts until the user speaks again (Evalplane default) | 4.2% | 3.7% |
 | one yes per action (`each: true`) | 27.8% | 13.9% |
 
-**A 35× spread in retail and 70× in airline, for three defensible readings of one policy sentence.** (These
+Precisely, the third row is "each action consumes the yes, and any reply that is not a yes also cancels it".
+Consuming the yes on each action without that reset gives 26.9% / 13.0%. All three rows, and the per-model split
+below, are recomputed by `scripts/readings_by_model.py` and checked by `scripts/verify-benchmark.py`.
+
+**A 35× spread in retail and 70× in airline, for three defensible readings of one policy sentence.** The airline
+ratio rests on a single violation under the first reading (1 of 431), so quote it as 0.2% vs 13.9%, not as a ratio.
+
+**The reading also changes which model looks most compliant.** In retail, under "lasts until the user speaks
+again", Claude 3.7 Sonnet has the highest share of solved runs with an unconfirmed mutation: 6.7% [4.5, 9.8]
+against GPT-4.1's 3.3% [1.8, 5.7]. Under "one yes per action" it has the lowest: 24.5% [20.3, 29.2] against
+GPT-4.1's 30.5% [25.8, 35.6]. That pair's order reverses in 93.7% of 2,000 task-clustered bootstrap resamples. In
+airline no pair reverses reliably, and Claude 3.7 Sonnet is the least compliant under every reading. The
+task-success leaderboard after removing violating runs barely moves: retail swaps 2nd and 3rd place under the
+strictest reading, and airline does not change. So the reading decides *compliance* comparisons, not who wins the
+benchmark. (These
 use their tool sets, which is why the middle row differs from our 2.6% / 4.0% headline — that is the
 check-surface effect again, in the same table.) Their own limitations section identifies this curve and says
 the strict reading "would raise the violation rate substantially but is closer to the policy's literal

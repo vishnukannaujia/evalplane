@@ -59,9 +59,22 @@
     "loops": {"telecom": 92, "airline": 1, "retail": 0}
   },
 
+  "calibration_curve": {
+    "_note": "scripts/readings_by_model.py: llmcontract-tau2 tool sets and vocabulary, only the lifetime of a yes varies. [solved runs with >=1 unconfirmed mutation, solved runs]",
+    "retail": {"session": [10, 1324], "turn": [55, 1324], "action_reset": [368, 1324]},
+    "airline": {"session": [1, 431], "turn": [16, 431], "action_reset": [60, 431]}
+  },
+
+  "readings_by_model_retail": {
+    "_note": "Per-model [solved and breaking, solved] in retail; the turn vs action_reset ranking reversal in docs/benchmark-tau2.md.",
+    "claude-3-7-sonnet-20250219": {"turn": [24, 359], "action_reset": [88, 359]},
+    "gpt-4.1-2025-04-14": {"turn": [11, 338], "action_reset": [103, 338]},
+    "gpt-4.1-mini-2025-04-14": {"turn": [12, 301], "action_reset": [91, 301]},
+    "o4-mini-2025-04-16": {"turn": [8, 326], "action_reset": [86, 326]}
+  },
+
   "not_machine_checked": {
     "strict_rates": "The `each: true` column (airline 8.6%, retail 18.3%) is recomputed, but 0.6% for telecom is trivially equal because its only confirmation rule is held out.",
-    "calibration_curve": "The three-row consent curve needs llmcontract-tau2's own tool sets and vocabulary reimplemented in our harness; it is not reproduced here. Their published 0.8%/0.2% reproduce from their repo, offline.",
     "confidence_intervals": "The log-Poisson CIs are derived from the counts above; the counts are checked, the arithmetic is not.",
     "hand_verification": "The 20-case retail review (0 clear false positives, 5 borderline) is a human judgement and cannot be recomputed.",
     "arxiv_figures": "arXiv 2607.07405's numbers are quoted from the paper, not reproduced; it re-ran the benchmark with API keys on different models."

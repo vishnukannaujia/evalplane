@@ -145,6 +145,21 @@ def main() -> int:
         for bucket in ("solved", "failed"):
             r.expect(f"{domain} {bucket} [violations, action calls]", [hits[bucket], calls[bucket]], want[bucket])
 
+    print("\nconsent calibration curve (llmcontract tool sets and vocabulary; scripts/readings_by_model.py):")
+    import readings_by_model as rbm  # noqa: E402  (sibling script; scripts/ is on sys.path when run directly)
+    rows = rbm.load_rows(args.tau2)
+    for domain, want in figures["calibration_curve"].items():
+        if domain.startswith("_"):
+            continue
+        for reading, pair in want.items():
+            r.expect(f"{domain} {reading} [solved and breaking, solved]",
+                     list(rbm.solved_breaking(rows, domain, reading)), pair)
+    for model, want in figures["readings_by_model_retail"].items():
+        if model.startswith("_"):
+            continue
+        for reading, pair in want.items():
+            r.expect(f"retail {model} {reading}", list(rbm.solved_breaking(rows, "retail", reading, model)), pair)
+
     print("\nscalars:")
     s = figures["scalars"]
     runs, profile = cache["telecom"]
